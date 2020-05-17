@@ -36,7 +36,7 @@ def process(udp_clients):
     for u in USERS:
         data_bytes, key = serialize_PUT(u)
         response = client_ring.get_node(key).send(data_bytes)
-        print(response)
+        # print(response)
         hash_codes.add(str(response.decode()))
 
 
@@ -47,7 +47,7 @@ def process(udp_clients):
         print(hc)
         data_bytes, key = serialize_GET(hc)
         response = client_ring.get_node(key).send(data_bytes)
-        print(response)
+        # print(response)
 
 
 if __name__ == "__main__":

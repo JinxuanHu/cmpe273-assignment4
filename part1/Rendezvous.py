@@ -2,6 +2,8 @@ from collections import defaultdict
 
 import murmur3
 from server_config import NODES
+import hashlib
+import mmh3
 
 
 class RendezvousHash(object):
@@ -10,27 +12,22 @@ class RendezvousHash(object):
         self.nodes = []
         self.nodes = nodes
         self.hash_function = lambda x: murmur3.murmur3_32(x)
+    
+    def murmur(self, key):
+        return mmh3.hash(key)
+    
+    def weight(self,node, key):
+        hash_key = self.murmur(key)
+        hash_node = self.murmur(str(node))
+        return ((hash_node ^ hash_key)%(2^32))
 
-    def get_node(self, key):
+
+    def get_node(self,key):
         max_weight = float("-inf")
         max_weight_node = None
         for node in self.nodes:
-            weight = self.hash_function("%s:%s" % (str(node), key))
-            print(weight)
-            if weight > max_weight:
-                max_weight = weight
+            nweight = self.weight(node, key)
+            if nweight > max_weight:
+                max_weight = nweight
                 max_weight_node = node
-
-            elif weight == max_weight:
-                max_weight = weight
-                max_weight_node = max(str(node), str(winner))
         return max_weight_node
-
-def test():
-    ring = Rendezvous(nodes=NODES)
-    node = ring.get_node('9ad5794ec94345c4873c4e591788743a')
-    print(node)
-    print(ring.get_node('ed9440c442632621b608521b3f2650b8'))
-
-if __name__ == "__main__":  
-    test()
